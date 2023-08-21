@@ -9,15 +9,17 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/modaniru/streamer-notifier-telegram/internal/client"
 	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
+	"github.com/modaniru/streamer-notifier-telegram/internal/service"
 )
 
 type TelegramBot struct {
 	bot *tgbotapi.BotAPI
 	twitchClient *client.TwitchClient
+	service *service.Service
 }
 
-func NewTelegramBot(bot *tgbotapi.BotAPI, twitchClient *client.TwitchClient) *TelegramBot {
-	return &TelegramBot{bot: bot, twitchClient: twitchClient}
+func NewTelegramBot(bot *tgbotapi.BotAPI, twitchClient *client.TwitchClient, service *service.Service) *TelegramBot {
+	return &TelegramBot{bot: bot, twitchClient: twitchClient, service: service}
 }
 
 func (t *TelegramBot) Listen(status chan int) {
@@ -30,7 +32,15 @@ func (t *TelegramBot) Listen(status chan int) {
 	for update := range updates {
 		if update.Message != nil { // If we got a message
 			text := update.Message.Text
-			if strings.HasPrefix(text, "/add "){
+			if strings.HasPrefix(text, "/start"){
+				id := int(update.Message.From.ID)
+				err := t.service.CreateNewUser(id)
+				if err != nil{
+					t.SendMessage("Ошибка!", int64(id))
+					continue
+				}
+				t.SendMessage("Привет! Начнем отслеживать твоих любимых стримеров?", int64(id))
+			} else if strings.HasPrefix(text, "/add "){
 				id, err := t.twitchClient.GetUserIdByLogin(strings.Split(text, " ")[1])
 				if err != nil{
 					if errors.Is(err, client.ErrStreamerNotFound){

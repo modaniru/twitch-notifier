@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
 )
@@ -26,6 +27,7 @@ func NewTwitchClient(client *http.Client, twitchClientId, twitchClientSecret str
 }
 
 func (t *TwitchClient) GetUserIdByLogin(login string) (string, error){
+	login = strings.ToLower(login)
 	token, err := t.GetToken()
 	if err != nil{
 		return "", err
