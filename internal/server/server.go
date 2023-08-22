@@ -29,9 +29,23 @@ func (s *server) Start(port string, channel chan int) {
 }
 
 func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
-	b, _ := io.ReadAll(r.Body)
-	var response entity.StreamOnlineNotification
-	err := json.Unmarshal(b, &response)
-	log.Println(response, err)
-	s.telegramBot.SendNotification(response, 31312)
+	if r.Header.Get("Twitch-Eventsub-Message-Type") == "webhook_callback_verification"{
+		var v entity.Verify
+		b, err := io.ReadAll(r.Body)
+		if err != nil{
+			log.Println(err.Error())
+		}
+		err = json.Unmarshal(b, &v)
+		if err != nil{
+			log.Println(err.Error())
+		}
+		w.Write([]byte(v.Challenge))
+	} else {
+		b, _ := io.ReadAll(r.Body)
+		var response entity.StreamOnlineNotification
+		err := json.Unmarshal(b, &response)
+		log.Println(response, err)
+		s.telegramBot.SendNotification(response, 31312)
+	}
+	
 }

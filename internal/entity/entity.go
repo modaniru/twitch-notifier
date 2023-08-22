@@ -5,6 +5,12 @@ type StreamOnlineNotification struct {
 	Event        Event        `json:"event"`
 }
 
+type Verify struct {
+	Subscription Subscription `json:"subscription"`
+	Event        Event        `json:"event"`
+	Challenge string `json:"challenge"`
+}
+
 type Subscription struct {
 	Condition Condition `json:"condition"`
 	Transport Transport `json:"transport"`
