@@ -11,24 +11,21 @@ func NewStreamerStorage(db *sql.DB) *StreamerStorage{
 }
 
 func (s *StreamerStorage) SaveStreamer(streamerId string) (int, error){
-	sql := "insert into streamers (streamer_id) values (?);"
+	sql := "insert into streamers (streamer_id) values ($1) returning id;"
 	stmt, err := s.db.Prepare(sql)
 	if err != nil{
 		return 0, err
 	}
-	response, err := stmt.Exec(streamerId)
+	var id int
+	err = stmt.QueryRow(streamerId).Scan(&id)
 	if err != nil{
 		return 0, err
 	}
-	id, err := response.LastInsertId()
-	if err != nil{
-		return 0, err
-	}
-	return int(id), err
+	return id, nil
 }
 
 func (u *StreamerStorage) DeleteStreamer(streamerId string) error{
-	sql := "delete from streamers where streamer_id = ?;"
+	sql := "delete from streamers where streamer_id = $1;"
 	stmt, err := u.db.Prepare(sql)
 	if err != nil{
 		return err
@@ -38,4 +35,18 @@ func (u *StreamerStorage) DeleteStreamer(streamerId string) error{
 		return err
 	}
 	return err
+}
+
+func (u *StreamerStorage) GetStreamer(streamerId string) (int, error){
+	sql := "select id from streamers where streamer_id = $1;"
+	stmt, err := u.db.Prepare(sql)
+	if err != nil{
+		return 0, err
+	}
+	var id int
+	err = stmt.QueryRow(streamerId).Scan(&id)
+	if err != nil{
+		return 0, err
+	}
+	return id, nil
 }

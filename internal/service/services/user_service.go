@@ -26,3 +26,7 @@ func (u *UserService) CreateNewUser(chatId int) error{
 	}
 	return err
 }
+
+func (u *UserService) GetUser(chatId int) (int, error){
+	return u.userStorage.GetUser(chatId)
+}

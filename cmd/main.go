@@ -19,19 +19,19 @@ import (
 // TODO wraps errors
 // TODO uris to consts
 func main() {
+	config.LoadConfig()
 	db, err := sql.Open("postgres", "postgres://postgres:postgres@localhost:1111/postgres?sslmode=disable")
 	if err != nil{
 		log.Fatal(err.Error())
 	}
-	storage := storage.NewStorage(db)
-	service := service.NewService(storage)
-	config.LoadConfig()
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_SECRET"))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	twitchClient := client.NewTwitchClient(&http.Client{}, os.Getenv("TWITCH_CLIENT_ID"), os.Getenv("TWITCH_CLIENT_SECRET"))
-	telegramBot := telegram.NewTelegramBot(bot, twitchClient, service)
+	storage := storage.NewStorage(db)
+	service := service.NewService(storage, twitchClient)
+	telegramBot := telegram.NewTelegramBot(bot, service)
 	httpServer := server.NewServer(http.DefaultServeMux, telegramBot)
 	status := make(chan int)
 

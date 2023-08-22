@@ -2,7 +2,7 @@ package storage
 
 import (
 	"database/sql"
-	"log"
+	// "log"
 
 	"github.com/modaniru/streamer-notifier-telegram/internal/storage/repo"
 )
@@ -15,11 +15,13 @@ type User interface{
 
 type Streamers interface{
 	SaveStreamer(streamerId string) (int, error)
+	GetStreamer(streamerId string) (int, error)
 	DeleteStreamer(streamerId string) error
 }
 
 type Follows interface{
-	SaveFollow(chatId int, streamerId string) error
+	GetStreamersIdByChatId(chatId int) ([]string, error)
+	SaveFollow(chatId int, streamerId int) error
 	GetCountOfFollows(streamerId string) (int, error)
 	GetAllStreamerFollowers(streamerId string) ([]int, error)
 }
@@ -31,27 +33,29 @@ type Storage struct{
 }
 
 func NewStorage(db *sql.DB) *Storage{
-	sql := `create table if exists users(
-		id serial primary key,
-		chat_id int
-	);
+	// sql := `
+	// drop table follows;
+	// drop table users;
+	// drop table streamers;
+	// create table if not exists users(
+	// 	id serial primary key,
+	// 	chat_id int
+	// );
 	
-	create table if exists streamers(
-		id serial primary key,
-		streamer_id varchar UNIQUE not null
-	);
+	// create table if not exists streamers(
+	// 	id serial primary key,
+	// 	streamer_id varchar UNIQUE not null
+	// );
 	
-	create table if exists follow(
-		user_id int,
-		streamer_id int,
-		foreign key (user_id) REFERENCES users (id) on delete CASCADE,
-		foreign key (streamer_id) REFERENCES streamers (id) on delete CASCADE
-	);`
+	// create table if not exists follows(
+	// 	chat_id int REFERENCES users (id) on delete CASCADE,
+	// 	streamer_id int REFERENCES streamers (id) on delete CASCADE
+	// );`
 
-	_, err := db.Exec(sql)
-	if err != nil{
-		log.Fatal(err.Error())
-	}
+	// _, err := db.Exec(sql)
+	// if err != nil{
+	// 	log.Fatal(err.Error())
+	// }
 	return &Storage{
 		User: repo.NewUserStorage(db),
 		Streamers: repo.NewStreamerStorage(db),

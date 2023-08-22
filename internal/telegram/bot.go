@@ -1,25 +1,22 @@
 package telegram
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/modaniru/streamer-notifier-telegram/internal/client"
 	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
 	"github.com/modaniru/streamer-notifier-telegram/internal/service"
 )
 
 type TelegramBot struct {
 	bot *tgbotapi.BotAPI
-	twitchClient *client.TwitchClient
 	service *service.Service
 }
 
-func NewTelegramBot(bot *tgbotapi.BotAPI, twitchClient *client.TwitchClient, service *service.Service) *TelegramBot {
-	return &TelegramBot{bot: bot, twitchClient: twitchClient, service: service}
+func NewTelegramBot(bot *tgbotapi.BotAPI, service *service.Service) *TelegramBot {
+	return &TelegramBot{bot: bot, service: service}
 }
 
 func (t *TelegramBot) Listen(status chan int) {
@@ -41,18 +38,28 @@ func (t *TelegramBot) Listen(status chan int) {
 				}
 				t.SendMessage("Привет! Начнем отслеживать твоих любимых стримеров?", int64(id))
 			} else if strings.HasPrefix(text, "/add "){
-				id, err := t.twitchClient.GetUserIdByLogin(strings.Split(text, " ")[1])
+				id := int(update.Message.From.ID)
+				nickname := strings.Split(text, " ")[1]
+				chatId, err := t.service.UserService.GetUser(id)
 				if err != nil{
-					if errors.Is(err, client.ErrStreamerNotFound){
-						t.SendMessage("Стример не найден!", update.Message.From.ID)
-						continue
-					}
-					t.SendMessage("Internal server error", update.Message.From.ID)
+					t.SendMessage(err.Error(), int64(id))
 					continue
 				}
-				t.SendMessage(fmt.Sprintf("Стример найден его user_id %s", id), update.Message.From.ID)
-				continue
-			}
+				err = t.service.StreamerService.SaveFollow(strings.ToLower(nickname), chatId)
+				if err != nil{
+					t.SendMessage(err.Error(), int64(id))
+				} else {
+					t.SendMessage("Успешно", int64(id))
+				}
+			} else if strings.HasPrefix(text, "/get "){
+				id := int(update.Message.From.ID)
+				res, err := t.service.StreamerService.GetUserFollows(id)
+				if err != nil{
+					t.SendMessage(err.Error(), int64(id))
+				} else {
+					t.SendMessage(fmt.Sprintf("%v", res), int64(id))
+				}
+			}	
 		}
 	}
 	status <- 1
