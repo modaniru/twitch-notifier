@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 	"errors"
+	"os"
 
 	"github.com/modaniru/streamer-notifier-telegram/internal/client"
 	"github.com/modaniru/streamer-notifier-telegram/internal/storage"
@@ -32,6 +33,10 @@ func (s *StreamerService) SaveFollow(login string, chatId int) error {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			streamerId, err = s.streamerStorage.SaveStreamer(id)
+			if err != nil{
+				return err
+			}
+			err = s.twitchClient.RegisterStreamWebhook("https://" + os.Getenv("DOMAIN") + "/stream-online", id)
 			if err != nil{
 				return err
 			}

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -111,4 +112,51 @@ func (t *TwitchClient) ValidateToken(token string) (bool, error){
 		return false, err
 	}
 	return res.StatusCode == 200, nil
+}
+
+type RegisterWebhookParams struct{
+	Type string `json:"type"`
+	Version string `json:"version"`
+	Condition Condition `json:"condition"`
+	Transport Transport `json:"transport"`
+}
+
+type Condition struct{
+	BroadcasterId string `json:"broadcaster_user_id"`
+}
+
+type Transport struct{
+	Method string `json:"method"`
+	Callback string `json:"callback"`
+	Secret string `json:"secret"`
+}
+
+func (t *TwitchClient) RegisterStreamWebhook(callback string, userId string) error{
+	condition := Condition{BroadcasterId: userId}
+	transport := Transport{Method: "webhook", Callback: callback, Secret: "secretsecret"}
+	requestModel := RegisterWebhookParams{Type: "stream.online", Version: "1", Transport: transport, Condition: condition}
+	byte, err := json.Marshal(&requestModel)
+	if err != nil{
+		return err
+	}
+	token, err := t.GetToken()
+	if err != nil{
+		return err
+	}
+	request, err := http.NewRequest(http.MethodPost, "https://api.twitch.tv/helix/eventsub/subscriptions", bytes.NewReader(byte))
+	if err != nil{
+		return err
+	}
+	request.Header.Set("Authorization", "Bearer " + token)
+	request.Header.Set("Client-Id", t.twitchClientId)
+	request.Header.Set("Content-Type", "application/json")
+	
+	response, err := t.client.Do(request)
+	fmt.Println(response, response.StatusCode)
+	b, _ := io.ReadAll(response.Body)
+	fmt.Println(string(b))
+	if response.StatusCode != 202{
+		return errors.New("status code is not 202")
+	}
+	return nil
 }
