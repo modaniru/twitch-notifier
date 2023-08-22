@@ -31,7 +31,7 @@ func (s *server) Start(port string, channel chan int) {
 func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
 	b, _ := io.ReadAll(r.Body)
 	var response entity.StreamOnlineNotification
-	json.Unmarshal(b, &response)
-	log.Println(response)
+	err := json.Unmarshal(b, &response)
+	log.Println(response, err)
 	s.telegramBot.SendNotification(response, 31312)
 }

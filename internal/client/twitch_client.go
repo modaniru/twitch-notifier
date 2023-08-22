@@ -152,9 +152,8 @@ func (t *TwitchClient) RegisterStreamWebhook(callback string, userId string) err
 	request.Header.Set("Content-Type", "application/json")
 	
 	response, err := t.client.Do(request)
-	fmt.Println(response, response.StatusCode)
-	b, _ := io.ReadAll(response.Body)
-	fmt.Println(string(b))
+	fmt.Println(response.StatusCode)
+	//b, _ := io.ReadAll(response.Body)
 	if response.StatusCode != 202{
 		return errors.New("status code is not 202")
 	}
