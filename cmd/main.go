@@ -40,8 +40,8 @@ func main() {
 	storage := storage.NewStorage(db)
 	service := service.NewService(storage, twitchClient)
 	telegramBot := telegram.NewTelegramBot(bot, service)
-	httpServer := server.NewServer(http.DefaultServeMux, telegramBot)
-	
+	httpServer := server.NewServer(http.DefaultServeMux, telegramBot, service.StreamerService)
+
 	status := make(chan int)
 	slog.Info("start listening telegram bot...")
 	go telegramBot.Listen(status)

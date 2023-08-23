@@ -18,8 +18,8 @@ type server struct {
 	followService service.StreamerService
 }
 
-func NewServer(s *http.ServeMux, telegram *telegram.TelegramBot) *server {
-	return &server{mux: s, telegramBot: telegram}
+func NewServer(s *http.ServeMux, telegram *telegram.TelegramBot, followService service.StreamerService) *server {
+	return &server{mux: s, telegramBot: telegram, followService: followService}
 }
 
 func (s *server) Start(port string, channel chan int) {
