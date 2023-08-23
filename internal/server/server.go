@@ -14,7 +14,7 @@ import (
 
 type server struct {
 	mux           *http.ServeMux
-	telegramBot *telegram.TelegramBot
+	telegramBot   *telegram.TelegramBot
 	followService service.StreamerService
 }
 
@@ -30,18 +30,17 @@ func (s *server) Start(port string, channel chan int) {
 	channel <- 1
 }
 
-
 // TODO check request sender
 func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Twitch-Eventsub-Message-Type") == "webhook_callback_verification"{
+	if r.Header.Get("Twitch-Eventsub-Message-Type") == "webhook_callback_verification" {
 		log.Info("webhook verification")
 		var v entity.Verify
 		b, err := io.ReadAll(r.Body)
-		if err != nil{
+		if err != nil {
 			log.Error(err.Error())
 		}
 		err = json.Unmarshal(b, &v)
-		if err != nil{
+		if err != nil {
 			log.Error(err.Error())
 		}
 		w.Write([]byte(v.Challenge))
@@ -49,20 +48,20 @@ func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
 		b, _ := io.ReadAll(r.Body)
 		var response entity.StreamOnlineNotification
 		err := json.Unmarshal(b, &response)
-		if err != nil{
+		if err != nil {
 			log.Error("unmarshal error", log.String("error", err.Error()))
 			return
 		}
 		log.Info("streamer online " + response.Event.BroadcasterUserLogin)
 		userList, err := s.followService.GetStreamerUsers(response.Event.BroadcasterUserId)
-		if err != nil{
+		if err != nil {
 			log.Error("get users that followed to streamer error", log.String("error", err.Error()))
-			return 
+			return
 		}
-		log.Info("userList", userList)
-		for _, id := range userList{
+		log.Info("userList", log.Any("arr", userList))
+		for _, id := range userList {
 			s.telegramBot.SendNotification(response, int64(id))
 		}
 	}
-	
+
 }
