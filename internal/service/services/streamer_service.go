@@ -59,3 +59,11 @@ func (s *StreamerService) GetUserFollows(chatId int) ([]string, error) {
 	}
 	return res, nil
 }
+
+func (s *StreamerService) GetStreamerUsers(streamerId string) ([]int, error){
+	res, err := s.followStorage.GetAllStreamerFollowers(streamerId)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

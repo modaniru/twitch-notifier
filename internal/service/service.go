@@ -14,6 +14,7 @@ type UserService interface {
 type StreamerService interface {
 	GetUserFollows(chatId int) ([]string, error)
 	SaveFollow(login string, chatId int) error
+	GetStreamerUsers(streamerId string) ([]int, error)
 }
 
 type Service struct {

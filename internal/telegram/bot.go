@@ -2,7 +2,8 @@ package telegram
 
 import (
 	"fmt"
-	"log"
+	log "log/slog"
+
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -22,10 +23,7 @@ func NewTelegramBot(bot *tgbotapi.BotAPI, service *service.Service) *TelegramBot
 func (t *TelegramBot) Listen(status chan int) {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-
 	updates := t.bot.GetUpdatesChan(u)
-
-	log.Println("start telegram bot")
 	for update := range updates {
 		if update.Message != nil { // If we got a message
 			text := update.Message.Text
@@ -66,8 +64,12 @@ func (t *TelegramBot) Listen(status chan int) {
 }
 
 func (t *TelegramBot) SendMessage(message string, chatId int64) {
-	msg := tgbotapi.NewMessage(451819182, message)
-	t.bot.Send(msg)
+	msg := tgbotapi.NewMessage(chatId, message)
+	_, err := t.bot.Send(msg)
+	log.Info(fmt.Sprintf("send message to %d", chatId))
+	if err != nil{
+		log.Error("send message error", log.String("error", err.Error()))
+	}
 }
 
 func (t *TelegramBot) SendNotification(notification entity.StreamOnlineNotification, chatId int64){
