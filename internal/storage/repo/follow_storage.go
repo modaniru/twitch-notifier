@@ -52,12 +52,13 @@ func (f *FollowStorage) GetAllStreamerFollowers(streamerId string) ([]int, error
 	if err != nil{
 		return nil, fmt.Errorf("exec %s error: %w", op, err)
 	}
+	rows.Columns()
 	defer rows.Close()
 	res := make([]int, 0)
 	for rows.Next(){
 		fmt.Println("test")
 		var chatId int
-		err := rows.Scan(&chatId)
+		err := rows.Scan(&streamerId)
 		if err != nil{
 			return nil, err
 		}
