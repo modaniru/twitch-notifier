@@ -43,7 +43,7 @@ func (f *FollowStorage) GetCountOfFollows(streamerId string) (int, error){
 }
 func (f *FollowStorage) GetAllStreamerFollowers(streamerId string) ([]int, error){
 	op := "GetAllStreamerFollowers"
-	sql := "select u.chat_id from users as u inner join follows as f on u.id = f.chat_id inner join streamers as s on f.streamer_id = s.id where f.streamer_id = $1;"
+	sql := "select u.chat_id from users as u inner join follows as f on u.id = f.chat_id inner join streamers as s on f.streamer_id = s.id where s.streamer_id = $1;"
 	stmt, err := f.db.Prepare(sql)
 	if err != nil{
 		return nil, fmt.Errorf("prepare %s error: %w", op, err)
