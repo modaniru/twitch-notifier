@@ -34,6 +34,7 @@ func (s *server) Start(port string, channel chan int) {
 // TODO check request sender
 func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Twitch-Eventsub-Message-Type") == "webhook_callback_verification"{
+		log.Info("webhook verification")
 		var v entity.Verify
 		b, err := io.ReadAll(r.Body)
 		if err != nil{
@@ -52,11 +53,13 @@ func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
 			log.Error("unmarshal error", log.String("error", err.Error()))
 			return
 		}
+		log.Info("streamer online " + response.Event.BroadcasterUserLogin)
 		userList, err := s.followService.GetStreamerUsers(response.Event.BroadcasterUserId)
 		if err != nil{
 			log.Error("get users that followed to streamer error", log.String("error", err.Error()))
 			return 
 		}
+		log.Info("userList", userList)
 		for _, id := range userList{
 			s.telegramBot.SendNotification(response, int64(id))
 		}
