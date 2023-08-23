@@ -55,6 +55,7 @@ func (f *FollowStorage) GetAllStreamerFollowers(streamerId string) ([]int, error
 	defer rows.Close()
 	res := make([]int, 0)
 	for rows.Next(){
+		fmt.Println("test")
 		var chatId int
 		err := rows.Scan(&chatId)
 		if err != nil{
