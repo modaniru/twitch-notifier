@@ -31,6 +31,7 @@ func main() {
 	}
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_SECRET"))
+	bot.Debug = true
 	if err != nil{
 		slog.Error("create bot api error", slog.String("error", err.Error()))
 		os.Exit(1)

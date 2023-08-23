@@ -60,6 +60,7 @@ func (t *TelegramBot) Listen(status chan int) {
 			}	
 		}
 	}
+	
 	status <- 1
 }
 
