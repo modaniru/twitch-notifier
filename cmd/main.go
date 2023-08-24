@@ -14,7 +14,7 @@ import (
 	"github.com/modaniru/streamer-notifier-telegram/internal/service"
 	"github.com/modaniru/streamer-notifier-telegram/internal/storage"
 	"github.com/modaniru/streamer-notifier-telegram/internal/telegram"
-	"github.com/modaniru/streamer-notifier-telegram/internal/telegram/router"
+	"github.com/modaniru/streamer-notifier-telegram/pkg/router"
 )
 
 // TODO wraps errors
