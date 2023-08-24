@@ -5,7 +5,7 @@ import (
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
-	"github.com/modaniru/streamer-notifier-telegram/internal/telegram/router"
+	"github.com/modaniru/streamer-notifier-telegram/pkg/router"
 )
 
 type TelegramBot struct {
