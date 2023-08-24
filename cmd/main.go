@@ -25,7 +25,7 @@ func main() {
 	LoggerConfigure(os.Getenv("LEVEL"))
 	slog.Info("logger was successfuly loaded")
 	// TODO to .env
-	db, err := sql.Open("postgres", "postgres://postgres:postgres@localhost:1111/postgres?sslmode=disable")
+	db, err := sql.Open("postgres", os.Getenv("DB_URI"))
 	if err != nil{
 		slog.Error("postgres open error", slog.String("error", err.Error()))
 		os.Exit(1)
