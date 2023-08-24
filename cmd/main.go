@@ -14,6 +14,7 @@ import (
 	"github.com/modaniru/streamer-notifier-telegram/internal/service"
 	"github.com/modaniru/streamer-notifier-telegram/internal/storage"
 	"github.com/modaniru/streamer-notifier-telegram/internal/telegram"
+	"github.com/modaniru/streamer-notifier-telegram/internal/telegram/router"
 )
 
 // TODO wraps errors
@@ -40,7 +41,8 @@ func main() {
 	twitchClient := client.NewTwitchClient(&http.Client{}, os.Getenv("TWITCH_CLIENT_ID"), os.Getenv("TWITCH_CLIENT_SECRET"))
 	storage := storage.NewStorage(db)
 	service := service.NewService(storage, twitchClient)
-	telegramBot := telegram.NewTelegramBot(bot, service)
+	router := telegram.NewMyRouter(router.NewRouter(), bot, service)
+	telegramBot := telegram.NewTelegramBot(bot, router.InitRouter())
 	httpServer := server.NewServer(http.DefaultServeMux, telegramBot, service.StreamerService)
 
 	status := make(chan int)
