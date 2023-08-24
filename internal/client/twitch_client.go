@@ -159,3 +159,43 @@ func (t *TwitchClient) RegisterStreamWebhook(callback string, userId string) err
 	}
 	return nil
 }
+
+func (t *TwitchClient) GetUsersByUserId(ids []string) ([]entity.UserInfo, error){
+	if len(ids) == 0{
+		return nil, fmt.Errorf("ids size is zero")
+	}
+	token, err := t.GetToken()
+	if err != nil{
+		return nil, err
+	}
+	uri := "https://api.twitch.tv/helix/users?id=" + ids[0]
+	for _, id := range ids[1:]{
+		uri += fmt.Sprintf("&id=%s", id)
+	}
+	request, err := http.NewRequest(http.MethodGet, uri, nil)
+	if err != nil{
+		return nil, err
+	}
+	request.Header.Set("Authorization", "Bearer " + token)
+	request.Header.Set("Client-Id", t.twitchClientId)
+	resp, err := t.client.Do(request)
+	if err != nil{
+		return nil, err
+	}
+	if resp.StatusCode != 200{
+		return nil, errors.New("request status code not 200")
+	}
+	b, err := io.ReadAll(resp.Body)
+	if err != nil{
+		return nil, err
+	}
+	var userInfo entity.UserCollection
+	err = json.Unmarshal(b, &userInfo)
+	if err != nil{
+		return nil, err
+	}
+	if len(userInfo.Data) == 0{
+		return nil, ErrStreamerNotFound
+	}
+	return userInfo.Data, nil
+}

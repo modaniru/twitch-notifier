@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/modaniru/streamer-notifier-telegram/internal/client"
+	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
 	"github.com/modaniru/streamer-notifier-telegram/internal/storage"
 )
 
@@ -52,12 +53,16 @@ func (s *StreamerService) SaveFollow(login string, chatId int) error {
 }
 
 // Must return slice of nicknames
-func (s *StreamerService) GetUserFollows(chatId int) ([]string, error) {
+func (s *StreamerService) GetUserFollows(chatId int) ([]entity.UserInfo, error) {
 	res, err := s.followStorage.GetStreamersIdByChatId(chatId)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	users, err := s.twitchClient.GetUsersByUserId(res)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (s *StreamerService) GetStreamerUsers(streamerId string) ([]int, error){

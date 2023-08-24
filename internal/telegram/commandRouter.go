@@ -96,10 +96,18 @@ func (m *MyRouter) AddStreamer(message *tgbotapi.Message){
 func (m *MyRouter) GetStreamers(message *tgbotapi.Message){
 	chatId := message.From.ID
 	res, err := m.service.StreamerService.GetUserFollows(int(chatId))
+	if len(res) == 0{
+		SendMessage(m.bot, "Вы не отслеживаете ни одного стримера! 😔", chatId)
+		return
+	}
+	msg := ""
+	for i, u := range res{
+		msg += fmt.Sprintf("%d. %s\n", i + 1, u.DisplayName)
+	}
 	if err != nil{
 		log.Error("get streamers error", log.String("error", err.Error()))
 		SendMessage(m.bot, errorMsg, chatId)
 	} else {
-		SendMessage(m.bot, fmt.Sprintf("%v", res), chatId)
+		SendMessage(m.bot, msg, chatId)
 	}
 }

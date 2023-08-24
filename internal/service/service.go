@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/modaniru/streamer-notifier-telegram/internal/client"
+	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
 	"github.com/modaniru/streamer-notifier-telegram/internal/service/services"
 	"github.com/modaniru/streamer-notifier-telegram/internal/storage"
 )
@@ -12,7 +13,7 @@ type UserService interface {
 }
 
 type StreamerService interface {
-	GetUserFollows(chatId int) ([]string, error)
+	GetUserFollows(chatId int) ([]entity.UserInfo, error)
 	SaveFollow(login string, chatId int) error
 	GetStreamerUsers(streamerId string) ([]int, error)
 }
