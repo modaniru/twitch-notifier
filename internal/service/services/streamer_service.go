@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"os"
+	"strconv"
 
 	"github.com/modaniru/streamer-notifier-telegram/internal/client"
 	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
@@ -71,4 +72,16 @@ func (s *StreamerService) GetStreamerUsers(streamerId string) ([]int, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+func (s *StreamerService) Unfollow(chatId int, login string) error {
+	streamerIdString, err := s.twitchClient.GetUserIdByLogin(login)
+	if err != nil {
+		return err
+	}
+	id, err := strconv.Atoi(streamerIdString)
+	if err != nil {
+		return err
+	}
+	return s.followStorage.Unfollow(chatId, id)
 }

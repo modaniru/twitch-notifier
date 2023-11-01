@@ -1,11 +1,15 @@
 package server
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	log "log/slog"
 	"net/http"
+	"os"
 
 	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
 	"github.com/modaniru/streamer-notifier-telegram/internal/service"
@@ -32,6 +36,14 @@ func (s *server) Start(port string, channel chan int) {
 
 // TODO check request sender
 func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
+	if ok, err := isTwitch(r); !ok || err != nil{
+		fmt.Println(ok, err.Error())
+		if err != nil{
+			http.Error(w, err.Error(), 404)
+			return
+		}
+		http.Error(w, "no valid key", 404)
+	}
 	if r.Header.Get("Twitch-Eventsub-Message-Type") == "webhook_callback_verification" {
 		log.Info("webhook verification")
 		var v entity.Verify
@@ -64,4 +76,18 @@ func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func isTwitch(r *http.Request) (bool, error) {
+	body := r.Body
+	b, err := io.ReadAll(body)
+	if err != nil {
+		return false, err
+	}
+	message := r.Header.Get("TWITCH_MESSAGE_ID") + r.Header.Get("TWITCH_MESSAGE_TIMESTAMP") + string(b)
+	fmt.Println(message)
+	sig := hmac.New(sha256.New, []byte(os.Getenv("SECRET")))
+	sig.Write([]byte(message))
+	h := "sha256=" + hex.EncodeToString(sig.Sum(nil))
+	return hmac.Equal([]byte(h), []byte(r.Header.Get("Twitch-Eventsub-Message-Signature"))), nil
 }

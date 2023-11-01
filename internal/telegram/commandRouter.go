@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/modaniru/streamer-notifier-telegram/internal/client"
+	mye "github.com/modaniru/streamer-notifier-telegram/internal/errors"
 	"github.com/modaniru/streamer-notifier-telegram/internal/service"
 	"github.com/modaniru/streamer-notifier-telegram/pkg/router"
 )
@@ -56,6 +58,10 @@ func (m *MyRouter) InitRouter() *router.CommandRouter {
 	m.router.AddCommand("/add", router.Command{
 		ArgumentsCount: 1,
 		CommandHandler: m.IsValidUser(m.AddStreamer),
+	})
+	m.router.AddCommand("/remove", router.Command{
+		ArgumentsCount: 1,
+		CommandHandler: m.IsValidUser(m.Unfollow),
 	})
 
 	return m.router
@@ -106,6 +112,14 @@ func (m *MyRouter) AddStreamer(message *tgbotapi.Message) {
 	}
 	err = m.service.StreamerService.SaveFollow(strings.ToLower(streamerLogin), userId)
 	if err != nil {
+		if errors.Is(err, mye.ErrFollowAlreadyExists) {
+			SendMessage(m.bot, "Вы уже отслеживаете его 🫥", chatId)
+			return
+		}
+		if errors.Is(err, client.ErrStreamerNotFound) {
+			SendMessage(m.bot, "Такой стример не найден ❎", chatId)
+			return
+		}
 		log.Error("save follow error", log.String("error", err.Error()))
 		SendMessage(m.bot, errorMsg, chatId)
 	} else {
@@ -129,5 +143,24 @@ func (m *MyRouter) GetStreamers(message *tgbotapi.Message) {
 		SendMessage(m.bot, errorMsg, chatId)
 	} else {
 		SendMessage(m.bot, msg, chatId)
+	}
+}
+
+func (m *MyRouter) Unfollow(message *tgbotapi.Message) {
+	chatId := message.From.ID
+	streamer := strings.Split(message.Text, " ")[1]
+	err := m.service.Unfollow(int(chatId), streamer)
+	if err != nil {
+		if errors.Is(err, mye.ErrFollowNotFound) {
+			SendMessage(m.bot, "Вы не были подписаны на этого стримера 🫢", chatId)
+			return
+		}
+		if errors.Is(err, client.ErrStreamerNotFound) {
+			SendMessage(m.bot, "Такой стример не найден ❎", chatId)
+			return
+		}
+		SendMessage(m.bot, errorMsg, chatId)
+	} else {
+		SendMessage(m.bot, "Успешно! 🥳", chatId)
 	}
 }

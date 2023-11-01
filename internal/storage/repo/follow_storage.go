@@ -3,6 +3,9 @@ package repo
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/lib/pq"
+	mye "github.com/modaniru/streamer-notifier-telegram/internal/errors"
 )
 
 type FollowStorage struct {
@@ -21,6 +24,31 @@ func (f *FollowStorage) SaveFollow(chatId int, streamerId int) error {
 		return fmt.Errorf("prepare %s error: %w", op, err)
 	}
 	_, err = stmt.Exec(chatId, streamerId)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return mye.ErrFollowAlreadyExists
+		}
+		return fmt.Errorf("exec %s error: %w", op, err)
+	}
+	return nil
+}
+
+func (f *FollowStorage) Unfollow(chatId int, streamerId int) error {
+	op := "Unfollow"
+	query := `DELETE FROM follows as f where chat_id = (select id from users where chat_id = $1) and streamer_id = (select id from streamers where streamer_id = $2);`
+	stmt, err := f.db.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("prepare %s error: %w", op, err)
+	}
+	res, err := stmt.Exec(chatId, streamerId)
+	// a := 0
+	// err = row.Scan(&a, &a)
+	if i, err := res.RowsAffected(); err != nil || i == 0 {
+		if err != nil {
+			return err
+		}
+		return mye.ErrFollowNotFound
+	}
 	if err != nil {
 		return fmt.Errorf("exec %s error: %w", op, err)
 	}
@@ -59,7 +87,7 @@ func (f *FollowStorage) GetAllStreamerFollowers(streamerId string) ([]int, error
 		var chatId int
 		err := rows.Scan(&chatId)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan %s error: %w", op, err)
 		}
 		res = append(res, chatId)
 	}

@@ -16,6 +16,7 @@ type StreamerService interface {
 	GetUserFollows(chatId int) ([]entity.UserInfo, error)
 	SaveFollow(login string, chatId int) error
 	GetStreamerUsers(streamerId string) ([]int, error)
+	Unfollow(chatId int, login string) error
 }
 
 type Service struct {

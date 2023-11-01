@@ -62,18 +62,15 @@ func LoggerConfigure(level string) {
 	switch level {
 	case "prod":
 		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level:     slog.LevelInfo,
-			AddSource: true,
+			Level: slog.LevelInfo,
 		})
 	case "dev":
 		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level:     slog.LevelDebug,
-			AddSource: true,
+			Level: slog.LevelDebug,
 		})
 	default:
 		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level:     slog.LevelInfo,
-			AddSource: true,
+			Level: slog.LevelInfo,
 		})
 	}
 	log := slog.New(handler)

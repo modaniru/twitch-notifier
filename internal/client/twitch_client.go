@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/modaniru/streamer-notifier-telegram/internal/entity"
@@ -132,7 +133,7 @@ type Transport struct {
 
 func (t *TwitchClient) RegisterStreamWebhook(callback string, userId string) error {
 	condition := Condition{BroadcasterId: userId}
-	transport := Transport{Method: "webhook", Callback: callback, Secret: "secretsecret"}
+	transport := Transport{Method: "webhook", Callback: callback, Secret: os.Getenv("SECRET")}
 	requestModel := RegisterWebhookParams{Type: "stream.online", Version: "1", Transport: transport, Condition: condition}
 	byte, err := json.Marshal(&requestModel)
 	if err != nil {

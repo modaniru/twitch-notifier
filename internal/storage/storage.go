@@ -28,6 +28,7 @@ type Follows interface {
 	SaveFollow(chatId int, streamerId int) error
 	GetCountOfFollows(streamerId string) (int, error)
 	GetAllStreamerFollowers(streamerId string) ([]int, error)
+	Unfollow(chatId int, streamerId int) error
 }
 
 type Storage struct {
@@ -46,7 +47,6 @@ func NewStorage(db *sql.DB) *Storage {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
 	err = m.Up()
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatal(err.Error())
