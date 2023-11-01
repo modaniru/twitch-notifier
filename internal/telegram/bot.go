@@ -9,7 +9,7 @@ import (
 )
 
 type TelegramBot struct {
-	bot *tgbotapi.BotAPI
+	bot    *tgbotapi.BotAPI
 	router *router.CommandRouter
 }
 
@@ -23,21 +23,19 @@ func (t *TelegramBot) Listen(status chan int) {
 	u.Timeout = 60
 	updates := t.bot.GetUpdatesChan(u)
 	for update := range updates {
-		if update.Message == nil{
+		if update.Message == nil {
 			continue
 		}
 		err := t.router.Route(update.Message)
-		if err != nil{
+		if err != nil {
 			SendMessage(t.bot, err.Error(), update.Message.From.ID)
 		}
 	}
-	
+
 	status <- 1
 }
 
-
-
-func (t *TelegramBot) SendNotification(notification entity.StreamOnlineNotification, chatId int64){
+func (t *TelegramBot) SendNotification(notification entity.StreamOnlineNotification, chatId int64) {
 	login := notification.Event.BroadcasterUserLogin
 	uri := fmt.Sprintf("twitch.tv/%s", login)
 	message := fmt.Sprintf("🔴 %s запустил стрим\n%s", login, uri)

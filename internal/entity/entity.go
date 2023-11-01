@@ -8,7 +8,7 @@ type StreamOnlineNotification struct {
 type Verify struct {
 	Subscription Subscription `json:"subscription"`
 	Event        Event        `json:"event"`
-	Challenge string `json:"challenge"`
+	Challenge    string       `json:"challenge"`
 }
 
 type Subscription struct {
@@ -39,7 +39,6 @@ type Event struct {
 	Type                 string `json:"type"`
 	StartedAt            string `json:"started_at"`
 }
-
 
 type UserInfo struct {
 	Id              string `json:"id"`

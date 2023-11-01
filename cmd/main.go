@@ -26,14 +26,14 @@ func main() {
 	slog.Info("logger was successfuly loaded")
 	// TODO to .env
 	db, err := sql.Open("postgres", os.Getenv("DB_URI"))
-	if err != nil{
+	if err != nil {
 		slog.Error("postgres open error", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
 	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_SECRET"))
 	bot.Debug = true
-	if err != nil{
+	if err != nil {
 		slog.Error("create bot api error", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
@@ -57,22 +57,22 @@ func main() {
 	}
 }
 
-func LoggerConfigure(level string){
+func LoggerConfigure(level string) {
 	var handler slog.Handler
-	switch level{
+	switch level {
 	case "prod":
 		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
+			Level:     slog.LevelInfo,
 			AddSource: true,
 		})
 	case "dev":
 		handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelDebug,
+			Level:     slog.LevelDebug,
 			AddSource: true,
 		})
 	default:
 		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
+			Level:     slog.LevelInfo,
 			AddSource: true,
 		})
 	}

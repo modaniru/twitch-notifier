@@ -7,32 +7,32 @@ import (
 	"github.com/modaniru/streamer-notifier-telegram/internal/storage/repo"
 )
 
-type User interface{
+type User interface {
 	SaveUserChatId(chatId int) (int, error)
 	DeleteUser(chatId int) error
 	GetUser(chatId int) (int, error)
 }
 
-type Streamers interface{
+type Streamers interface {
 	SaveStreamer(streamerId string) (int, error)
 	GetStreamer(streamerId string) (int, error)
 	DeleteStreamer(streamerId string) error
 }
 
-type Follows interface{
+type Follows interface {
 	GetStreamersIdByChatId(chatId int) ([]string, error)
 	SaveFollow(chatId int, streamerId int) error
 	GetCountOfFollows(streamerId string) (int, error)
 	GetAllStreamerFollowers(streamerId string) ([]int, error)
 }
 
-type Storage struct{
+type Storage struct {
 	User
 	Streamers
 	Follows
 }
 
-func NewStorage(db *sql.DB) *Storage{
+func NewStorage(db *sql.DB) *Storage {
 	sql := `
 	create table if not exists users(
 		id serial primary key,
@@ -50,12 +50,12 @@ func NewStorage(db *sql.DB) *Storage{
 	);`
 
 	_, err := db.Exec(sql)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err.Error())
 	}
 	return &Storage{
-		User: repo.NewUserStorage(db),
+		User:      repo.NewUserStorage(db),
 		Streamers: repo.NewStreamerStorage(db),
-		Follows: repo.NewFollowStorage(db),
+		Follows:   repo.NewFollowStorage(db),
 	}
 }

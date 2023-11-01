@@ -34,11 +34,11 @@ func (s *StreamerService) SaveFollow(login string, chatId int) error {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			streamerId, err = s.streamerStorage.SaveStreamer(id)
-			if err != nil{
+			if err != nil {
 				return err
 			}
-			err = s.twitchClient.RegisterStreamWebhook("https://" + os.Getenv("DOMAIN") + "/stream-online", id)
-			if err != nil{
+			err = s.twitchClient.RegisterStreamWebhook("https://"+os.Getenv("DOMAIN")+"/stream-online", id)
+			if err != nil {
 				return err
 			}
 		} else {
@@ -65,7 +65,7 @@ func (s *StreamerService) GetUserFollows(chatId int) ([]entity.UserInfo, error) 
 	return users, nil
 }
 
-func (s *StreamerService) GetStreamerUsers(streamerId string) ([]int, error){
+func (s *StreamerService) GetStreamerUsers(streamerId string) ([]int, error) {
 	res, err := s.followStorage.GetAllStreamerFollowers(streamerId)
 	if err != nil {
 		return nil, err

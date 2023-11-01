@@ -25,7 +25,7 @@ type Service struct {
 
 func NewService(storage *storage.Storage, twitchClient *client.TwitchClient) *Service {
 	return &Service{
-		UserService: services.NewUserService(storage.User),
+		UserService:     services.NewUserService(storage.User),
 		StreamerService: services.NewStreamerService(storage.Streamers, storage.Follows, twitchClient),
 	}
 }
