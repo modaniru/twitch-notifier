@@ -1,0 +1,38 @@
+version: '3.1'
+
+services:
+  notifyka:
+    build: .
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      - SECRET=${SECRET}
+      - DB_SOURCE=${DB_SOURCE}
+    volumes:
+      - ./resources:/app/resources
+  caddy:
+    image: "caddy:latest"
+    ports:
+      - 80:80
+      - 443:443
+    depends_on: 
+      - notifyka
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./site:/srv
+      - ./caddy_data:/data
+      - ./caddy_config:/config
+    restart: always
+  postgres:
+    image: "postgres:latest"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always

@@ -36,9 +36,9 @@ func (s *server) Start(port string, channel chan int) {
 
 // TODO check request sender
 func (s *server) StreamOnline(w http.ResponseWriter, r *http.Request) {
-	if ok, err := isTwitch(r); !ok || err != nil{
+	if ok, err := isTwitch(r); !ok || err != nil {
 		fmt.Println(ok, err.Error())
-		if err != nil{
+		if err != nil {
 			http.Error(w, err.Error(), 404)
 			return
 		}
