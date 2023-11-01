@@ -1,6 +1,8 @@
 package telegram
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	log "log/slog"
 	"strings"
@@ -17,7 +19,8 @@ type MyRouter struct {
 }
 
 const (
-	errorMsg = "Ошибка! 😶"
+	errorMsg  = "Ошибка! 😶"
+	noAuthMsg = "Прежде чем начать пользоваться ботом, введите команду /start"
 )
 
 func NewMyRouter(router *router.CommandRouter, bot *tgbotapi.BotAPI, service *service.Service) *MyRouter {
@@ -44,18 +47,35 @@ func (m *MyRouter) InitRouter() *router.CommandRouter {
 	})
 	m.router.AddCommand("/ping", router.Command{
 		ArgumentsCount: 0,
-		CommandHandler: m.PingCommand,
+		CommandHandler: m.IsValidUser(m.PingCommand),
 	})
 	m.router.AddCommand("/get", router.Command{
 		ArgumentsCount: 0,
-		CommandHandler: m.GetStreamers,
+		CommandHandler: m.IsValidUser(m.GetStreamers),
 	})
 	m.router.AddCommand("/add", router.Command{
 		ArgumentsCount: 1,
-		CommandHandler: m.AddStreamer,
+		CommandHandler: m.IsValidUser(m.AddStreamer),
 	})
 
 	return m.router
+}
+
+func (m *MyRouter) IsValidUser(f router.CommandHandler) router.CommandHandler {
+	return func(message *tgbotapi.Message) {
+		chatId := message.From.ID
+		_, err := m.service.UserService.GetUser(int(chatId))
+		if errors.Is(err, sql.ErrNoRows) {
+			log.Error(err.Error())
+			SendMessage(m.bot, noAuthMsg, chatId)
+			return
+		} else if err != nil {
+			log.Error(err.Error())
+			SendMessage(m.bot, errorMsg, chatId)
+			return
+		}
+		f(message)
+	}
 }
 
 func (m *MyRouter) StartCommand(message *tgbotapi.Message) {

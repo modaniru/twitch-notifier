@@ -15,6 +15,8 @@ var (
 	ErrSoManyArguments    = errors.New("so many arguments")
 )
 
+type CommandHandler func(message *tgbotapi.Message)
+
 type Command struct {
 	ArgumentsCount int
 	CommandHandler CommandHandler
@@ -51,5 +53,3 @@ func (c *CommandRouter) Route(message *tgbotapi.Message) error {
 	command.CommandHandler(message)
 	return nil
 }
-
-type CommandHandler func(message *tgbotapi.Message)
